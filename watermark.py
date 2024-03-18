@@ -7,13 +7,15 @@ import time
 import shutil
 import os
 import keyboard
+import urllib.request
 
-folder_path = r"E:\ickala_new\shakese_poosheha\watermark"
+
+folder_path = r"E:\ickala_new\watermark"
     # پیدا کردن تمامی فایل‌های عکس در پوشه
 image_files = [f for f in os.listdir(folder_path) if f.endswith('.jpg')]
 
-source_directory = r"C:\Users\ehsan\Downloads"
-destination_directory = r"E:\ickala_new\shakese_poosheha\watermark_ok"
+# source_directory = r"C:\Users\ehsan\Downloads"
+# destination_directory = r"E:\skyteck\watermark_ok"
 
 
 driver = webdriver.Chrome()
@@ -52,40 +54,49 @@ for image_file in image_files:
         WebDriverWait(driver, 50).until(
         EC.staleness_of(driver.find_element(By.XPATH, ' //*[@id="__next"]/div[2]/div[2]/div[1]/div[2]/div[4]/div/div/div[1]/div/div/div')))
 
+        img_element = driver.find_element(By.XPATH, '//img[contains(@class, "max-h-[465px]") and contains(@class, "tlg:h-full") and @slot="second" and @alt="enhanced-image"]')
 
+        kosmadarehamid = img_element.get_attribute("src")
+        print("src attribute:", kosmadarehamid)
+        
+        download_folder = r"C:\Users\ehsan\Downloads"
+        file_name = image_file  # نام دلخواه فایل
+        file_path = os.path.join(download_folder, file_name)
+        urllib.request.urlretrieve(kosmadarehamid, file_path)
         # Wait for the button to be visible and clickable
-        button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Download")]'))  # Adjust XPath if needed
-        )
-        # Click the button
-        driver.execute_script("arguments[0].click();", button)
+        # button = WebDriverWait(driver, 10).until(
+        #     EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Download")]'))  # Adjust XPath if needed
+        # )
+        # # Click the button
+        # driver.execute_script("arguments[0].click();", button)
 
 
-        start_time = time.time()
-        file_moved = False
-        while time.time() - start_time <= timeout:
-            files = os.listdir(source_directory)
-            for file in files:
-                source_path = os.path.join(source_directory, file)
-                if os.path.isfile(source_path) and file.lower().endswith('.jpeg'):
-                    # New filename
-                    new_filename = image_file
-                    destination_path = os.path.join(destination_directory, new_filename)
-                    shutil.move(source_path, destination_path)
-                    print(f"File {file} moved successfully to {new_filename}.")
-                    file_moved = True
-                    break  # Exit the inner for loop
-            if file_moved:
-                break  # Exit the outer while loop
-            time.sleep(1)
+        # start_time = time.time()
+        # file_moved = False
+        # while time.time() - start_time <= timeout:
+        #     files = os.listdir(source_directory)
+        #     for file in files:
+        #         source_path = os.path.join(source_directory, file)
+        #         if os.path.isfile(source_path) and file.lower().endswith('.jpeg'):
+        #             # New filename
+        #             new_filename = image_file
+        #             destination_path = os.path.join(destination_directory, new_filename)
+        #             shutil.move(source_path, destination_path)
+        #             print(f"File {file} moved successfully to {new_filename}.")
+        #             file_moved = True
+        #             break  # Exit the inner for loop
+        #     if file_moved:
+        #         break  # Exit the outer while loop
+        #     time.sleep(1)
 
-        if not file_moved:
-            print("Timeout reached. No new jpg file created.")
+        # if not file_moved:
+        #     print("Timeout reached. No new jpg file created.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
+        driver.quit()
+        driver = webdriver.Chrome()
+        driver.get("https://dewatermark.ai/")
     finally:
         # در پایان بستن مرورگر
         driver.refresh()
